@@ -40,6 +40,19 @@ class LdapManager implements LdapManagerInterface
      */
     public function findUserBy(array $criteria)
     {
+        $data = $this->findDataBy($criteria);
+
+        $user = $this->userManager->createUser();
+        $this->hydrate($user, $data);
+
+        return $user;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function findDataBy(array $criteria)
+    {
         $filter  = $this->buildFilter($criteria);
         $entries = $this->connection->search($this->params['baseDn'], $filter, $this->ldapAttributes);
 
@@ -50,10 +63,8 @@ class LdapManager implements LdapManagerInterface
         if ($entries['count'] == 0) {
             return false;
         }
-        $user = $this->userManager->createUser();
-        $this->hydrate($user, $entries[0]);
 
-        return $user;
+        return $entries[0];
     }
 
     /**
